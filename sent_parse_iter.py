@@ -3,7 +3,6 @@
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
 """ """
-from nltk.tree import Tree
 import logging
 
 
@@ -55,7 +54,8 @@ def main():
     obj1 = SentParseGen("flat_train_2012/bc_cctv_0001.v4_auto_conll")
     i = 0
     while i < 10:
-        logging.info(next(obj1))
+        sent, parse = next(obj1)
+        logging.info((sent, parse))
         i += 1
 
 
