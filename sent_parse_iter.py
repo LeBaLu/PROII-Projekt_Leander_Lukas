@@ -3,22 +3,60 @@
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
 """ """
-import os
-import nltk.tree
+from nltk.tree import Tree
 import logging
 
 
-logging.basicConfig(filename='out.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
-class SentParseIter():
+class SentParseGen():
     """ """
-    def __init__(path):
-        self.path = path
+    def __init__(self, path):
+        self.file = open(path, encoding='utf-8')
+        self.gen = self.sent_parse_pair_generator()
+
+    def sent_parse_pair_generator(self):
+        current_line = next(self.file)
+        # Sentence (nested list of str).
+        cell_mat = []
+        # Treestring.
+        t = ''
+        while True:
+            # Ignore the lines for which this holds true.
+            if (not current_line.strip()
+            or current_line[0] == '#'):
+                try:
+                    current_line = next(self.file)
+                    continue
+                except StopIteration:
+                    self.file.close()
+                    return
+            while (current_line.strip()
+            and current_line[0] != '#'):
+                cells = current_line.split()[3:]
+                cell_mat.append(cells)
+                t = ''.join((t, cells[2].replace('*',
+                f"({ cells[1] } { cells[0] })")))
+                try:
+                    current_line = next(self.file)
+                except StopIteration:
+                    self.file.close()
+                    return cell_mat, t.replace('(', ' (')[1:]
+            yield cell_mat, t.replace('(', ' (')[1:]
+            cell_mat = []
+            t = ''
+
+    def __next__(self):
+        return next(self.gen)
 
 
 def main():
-    pass
+    obj1 = SentParseGen("flat_train_2012/bc_cctv_0001.v4_auto_conll")
+    i = 0
+    while i < 10:
+        logging.info(next(obj1))
+        i += 1
 
 
 if __name__ == "__main__":
