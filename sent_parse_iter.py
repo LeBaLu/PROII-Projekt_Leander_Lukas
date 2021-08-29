@@ -31,17 +31,20 @@ class SentParseGen():
                 except StopIteration:
                     self.file.close()
                     return
+            # Wordindex.
+            i = 0
             while (current_line.strip()
             and current_line[0] != '#'):
                 cells = current_line.split()[3:]
                 cell_mat.append(cells)
                 t = ''.join((t, cells[2].replace('*',
-                f"({ cells[1] } { cells[0] })")))
+                f"({ cells[1] } { cells[0] }/{ i })")))
                 try:
                     current_line = next(self.file)
                 except StopIteration:
                     self.file.close()
                     return cell_mat, t.replace('(', ' (')[1:]
+                i += 1
             yield cell_mat, t.replace('(', ' (')[1:]
             cell_mat = []
             t = ''
@@ -51,12 +54,15 @@ class SentParseGen():
 
 
 def main():
+    # How to generate all lines from the first file of the Ontonotes training
+    # data.
     obj1 = SentParseGen("flat_train_2012/bc_cctv_0001.v4_auto_conll")
-    i = 0
-    while i < 10:
-        sent, parse = next(obj1)
+    while True:
+        try:
+            sent, parse = next(obj1)
+        except StopIteration:
+            break
         logging.info((sent, parse))
-        i += 1
 
 
 if __name__ == "__main__":
