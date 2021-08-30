@@ -12,7 +12,9 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 class SieveFramework(AbstractSieve):
     """ """
-    pass
+    def __init__(path, mentions, clusters, mention_to_cluster):
+        super().init(mentions, clusters, mention_to_cluster)
+        self.generator = SentParseGen(path)
 
 
 def main():
