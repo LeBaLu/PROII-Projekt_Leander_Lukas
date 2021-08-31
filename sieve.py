@@ -59,6 +59,43 @@ class AbstractSieve(ABC):
             frontier.pop(0)
         return trees_out
 
+    def select_mentions(self, mention_list):
+        """Decides which mentions to resolve with a sieve.
+
+        Arg:
+            mention_list(list of tuple): Mentions, whose resolving we make a
+                                         decision about.
+
+        Returns:
+            to_select(list of bool): Records the result of each decision in
+                                     the same order that the mentions appear
+                                     in mention_list in.
+
+        """
+        # To keep track of clusters whose first occurence was already given
+        # the permission to be resolved.
+        existing_clusters = set()
+        # Who are our candidates?.
+        to_select = []
+        pos = 0
+        for mention in mention_list:
+            cluster = self.mentions_to_clusters[mention]
+            # Don't resolve the first mention in the list.
+            if pos == 0:
+                to_select.append(False)
+                existing_clusters.add(cluster)
+                pos += 1
+                continue
+            # Only resolve the first appearance of a cluster.
+            elif cluster in existing_clusters:
+                to_select.append(False)
+                pos += 1
+                continue
+            to_select.append(True)
+            existing_clusters.add(cluster)
+            pos += 1
+        return to_select
+
     def merge_clusters(self, a, b):
         """Combines two clusters into one.
 
@@ -86,10 +123,26 @@ class AbstractSieve(ABC):
         self.clusters[orig] = tuple(orig_sets)
         del self.clusters[spec]
 
+    @abstractmethod
+    def apply_sieve(self):
+        """Will merge clusters, if conditions are met.
+
+        Has to be implemented in every subclass.
+
+        """
+        pass
+
 
 def main():
-    obj1 = AbstractSieve([], {0: ({(0, 0, 0)}, {0}), 1: ({(1, 0, 0)}, {1})},
-                         {(0, 0, 0): 0, (1, 0, 0): 1})
+    # Dieser Code funktioniert nur, wenn man den abstractmethod-Decorator
+    # auskommentiert, das eine abstrakte Klasse selbst nicht instanziiert
+    # werden sollte.
+    obj1 = AbstractSieve([(0, 0, 0), (1, 0, 0), (2, 3, 5)],
+                         {0: ({(0, 0, 0)}, {0}),
+                          1: ({(1, 0, 0), (2, 3, 5)}, {1})
+                                                          },
+                         {(0, 0, 0): 0, (1, 0, 0): 1, (2, 3, 5): 1})
+    logging.info(obj1.select_mentions(obj1.mentions))
     obj1.merge_clusters(0, 1)
     logging.info(obj1.clusters)
     logging.info(obj1.mentions_to_clusters)
