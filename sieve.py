@@ -3,6 +3,7 @@
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
 """Abstrakte Siebklasse."""
+from abc import ABC, abstractmethod
 from nltk.tree import Tree
 from sent_parse_iter import SentParseGen
 import logging
@@ -11,9 +12,10 @@ import logging
 logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
-class AbstractSieve():
+class AbstractSieve(ABC):
     """ """
-    def __init__(self, mentions=[], clusters=[], mention_to_cluster=dict()):
+    def __init__(self, mentions=[], clusters=dict(),
+                 mention_to_cluster=dict()):
         self.mentions = mentions
         self.clusters = clusters
         self.mention_to_cluster = mention_to_cluster
@@ -54,7 +56,6 @@ class AbstractSieve():
                 if act_node.label() in label_in:
                     trees_out.append(act_node)
                 for child in act_node[::step_size]:
-                    logging.info(frontier)
                     frontier.append(child)
             frontier.pop(0)
         return trees_out
