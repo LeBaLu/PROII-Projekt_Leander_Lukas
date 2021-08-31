@@ -14,11 +14,10 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 class AbstractSieve(ABC):
     """ """
-    def __init__(self, mentions=[], clusters=dict(),
-                 mention_to_cluster=dict()):
+    def __init__(self, mentions, clusters, mentions_to_clusters):
         self.mentions = mentions
         self.clusters = clusters
-        self.mention_to_cluster = mention_to_cluster
+        self.mentions_to_clusters = mentions_to_clusters
 
     @staticmethod
     def breadth_first_tree_traversal(tree, label_in=['NP', 'NX'], left_to_right=True):
@@ -60,9 +59,40 @@ class AbstractSieve(ABC):
             frontier.pop(0)
         return trees_out
 
+    def merge_clusters(self, a, b):
+        """Combines two clusters into one.
+
+        The resulting cluster always retains the smaller cluster-ID and
+        discards the bigger one.
+
+        Args:
+            a(int): Cluster-ID of the cluster to be merged with cluster b.
+            b(int): Cluster-ID of the cluster to be merged with cluster a.
+
+        """
+        # ID of cluster that keeps its ID.
+        orig = min((a, b))
+        # ID of cluster that loses its ID.
+        spec = max((a, b))
+        # Assign new cluster-ID in reference dictionary.
+        for mention in self.clusters[spec][0]:
+            self.mentions_to_clusters[mention] = orig
+        # Join mention and feature sets together.
+        orig_sets = list(self.clusters[orig])
+        for i in range(len(orig_sets)):
+            logging.info(self.clusters[orig])
+            s = orig_sets[i]
+            orig_sets[i] = s.union(self.clusters[spec][i])
+        self.clusters[orig] = tuple(orig_sets)
+        del self.clusters[spec]
+
 
 def main():
-    obj1 = AbstractSieve("flat_train_2012/bc_cctv_0001.v4_auto_conll")
+    obj1 = AbstractSieve([], {0: ({(0, 0, 0)}, {0}), 1: ({(1, 0, 0)}, {1})},
+                         {(0, 0, 0): 0, (1, 0, 0): 1})
+    obj1.merge_clusters(0, 1)
+    logging.info(obj1.clusters)
+    logging.info(obj1.mentions_to_clusters)
     tree = Tree('S', [Tree('NP', ['the', 'cat']), Tree('VP', ['ate'])])
     # Right to left breadth first traversal of NPs in tree.
     NPs1 = AbstractSieve.breadth_first_tree_traversal(tree,
