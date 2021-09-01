@@ -59,6 +59,54 @@ class AbstractSieve(ABC):
             frontier.pop(0)
         return trees_out
 
+    @staticmethod
+    def word_string_from_tree(tree, start, end):
+        """Gives the mention the shape of a string.
+
+        Args:
+            tree(nltk.Tree): The parse tree of a sentence.
+            start(int): Index of the first word of the mention.
+            end(int): Index of the last word of the mention.
+
+        Returns:
+            word_string(str): The words of the mention's phrase seperated by
+                              whitespaces.
+
+        """
+        word_string = ""
+        for leaf in tree.leaves()[start:end+1]:
+            word_string = ' '.join((word_string,
+                                    "/".join(leaf.split('/')[:-1])))
+        return word_string
+
+    @classmethod
+    def sort_mentions_by_bftt(cls, mention_list, tree, sent_id, l_to_r=True):
+        """Sorts a list of triples according to a tree.
+
+        Args:
+            mention_list(list of tuple): Mentions that are to be sorted.
+            tree(nltk.Tree): The tree whose breadth-first traversal determines
+                             the sorting order of the mentions.
+            sent_id(int): Index of the sentence, the mentions belong to.
+            l_to_r(:obj:'bool', optional): Determines whether the levels of
+                                           the tree are traversed from left to
+                                           right, if True or from right to
+                                           left, if False.
+
+        Returns:
+            sorted_list(list of tuple): A list of triples sorted by
+                                        breadth-first tree traversal according
+                                        to the respective parse tree.
+
+        """
+        bftt = cls.breadth_first_tree_traversal
+        sorted_list = []
+        for subtree in bftt(tree, left_to_right=l_to_r):
+            start = int(subtree.leaves()[0].split('/')[-1])
+            end = int(subtree.leaves()[-1].split('/')[-1])
+            sorted_list.append((sent_id, start, end))
+        return sorted_list
+
     def select_mentions(self, mention_list):
         """Decides which mentions to resolve with a sieve.
 
@@ -117,7 +165,6 @@ class AbstractSieve(ABC):
         # Join mention and feature sets together.
         orig_sets = list(self.clusters[orig])
         for i in range(len(orig_sets)):
-            logging.info(self.clusters[orig])
             s = orig_sets[i]
             orig_sets[i] = s.union(self.clusters[spec][i])
         self.clusters[orig] = tuple(orig_sets)
@@ -135,7 +182,7 @@ class AbstractSieve(ABC):
 
 def main():
     # Dieser Code funktioniert nur, wenn man den abstractmethod-Decorator
-    # auskommentiert, das eine abstrakte Klasse selbst nicht instanziiert
+    # auskommentiert, da eine abstrakte Klasse selbst nicht instanziiert
     # werden sollte.
     obj1 = AbstractSieve([(0, 0, 0), (1, 0, 0), (2, 3, 5)],
                          {0: ({(0, 0, 0)}, {0}),

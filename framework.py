@@ -5,6 +5,7 @@
 """ """
 from sieve import AbstractSieve as abs
 from sent_parse_iter import SentParseGen
+from sieves import *
 from nltk.tree import Tree
 import logging
 
@@ -14,15 +15,22 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 class SieveFramework():
     """ """
-    def __init__(self, path):
-        self.generator = SentParseGen(path)
+
+    id_to_sieve = {'exact_match': exact_match_sieve.ExactMatchSieve}
+
+    def __init__(self, path, sieve_appliance=['exact_match']):
+        self.generator = SentParseGen(path,
+                                      sent_to_line=('saves/',
+                                      ''.join((path.split('/')[-1][:-14],
+                                      '_sentence_to_line.csv'))))
+        self.sieve_appliance = sieve_appliance
 
     def claim_mentions(self):
         """Creates the initial one-mention-clusters.
 
         Agreement information is encoded as follows:
-            0 - singular, inanimate.
-            1 - plural, 1st person, animate.
+            0 - singular, inanimate, not a pronoun.
+            1 - plural, 1st person, animate, pronoun.
             2 - 2nd person.
             3 - 3rd person.
 
@@ -38,12 +46,13 @@ class SieveFramework():
                                                                  sentence's
                                                                  parse tree
                                                                  (nltk.Tree).
-            clusters(dict): Cluster-IDs as keys and tuples of 4 sets as values
+            clusters(dict): Cluster-IDs as keys and tuples of 5 sets as values
                             with the 1st set containing mentions as triples
                             of sentence-ID, the first word's ID and the last
                             word's ID, the 2nd set containing number
-                            information, the 3rd containing person information
-                            and the 4th containing animacy information.
+                            information, the 3rd containing person
+                            information, the 4th containing animacy
+                            information and the 5th declaring pronounhood.
             mentions_to_clusters(dict): Mentions(see clusters) as keys and
                                         cluster-IDs(int) as values.
 
@@ -70,7 +79,7 @@ class SieveFramework():
             # Save all NPs as mentions.
             for subtree in bftt(tree):
                 # Template for cluster as it will be saved in the dictionary.
-                atom_cluster = set(), set(), set(), set()
+                atom_cluster = set(), set(), set(), set(), set()
                 # Index of 1st word of RE.
                 start = int(subtree.leaves()[0].split('/')[-1])
                 # Index of last word of RE.
@@ -122,6 +131,14 @@ class SieveFramework():
                         atom_cluster[3].add(1)
                     else:
                         atom_cluster[3].add(0)
+                # Pronoun?.
+                if start == end:
+                    if sent[start][1] == 'PRP':
+                        atom_cluster[4].add(1)
+                    else:
+                        atom_cluster[4].add(0)
+                else:
+                    atom_cluster[4].add(0)
                 clusters[cluster_id] = atom_cluster
                 mentions_to_clusters[long_mention] = cluster_id
                 cluster_id += 1
@@ -129,10 +146,24 @@ class SieveFramework():
             sent_id += 1
         return mentions, clusters, mentions_to_clusters
 
+    def multi_pass_sieve(self):
+        """ """
+        ments, clusts, ments_to_clusts = self.claim_mentions()
+        for sieve_id in self.sieve_appliance:
+            sieve = self.id_to_sieve[sieve_id](ments, clusts, ments_to_clusts)
+            sieve.apply_sieve()
+            ments = sieve.mentions
+            clusts = sieve.clusters
+            ments_to_clusts = sieve.mentions_to_clusters
+        return ments, clusts, ments_to_clusts
+
 
 def main():
     obj1 = SieveFramework("flat_train_2012/bc_cctv_0001.v4_auto_conll")
-    logging.info(obj1.claim_mentions()[1])
+    #m1, c1, m_to_c1 = obj1.claim_mentions()
+    #logging.info(c1)
+    m2, c2, m_to_c2 = obj1.multi_pass_sieve()
+    logging.info(c2)
 
 
 if __name__ == "__main__":

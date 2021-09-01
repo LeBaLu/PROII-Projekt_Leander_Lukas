@@ -3,6 +3,9 @@
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
 """ """
+
+import pandas as pd
+import os
 import logging
 
 
@@ -11,12 +14,18 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 class SentParseGen():
     """ """
-    def __init__(self, path):
+    def __init__(self, path, sent_to_line=tuple()):
         self.file = open(path, encoding='utf-8')
         self.gen = self.sent_parse_pair_generator()
+        self.sent_to_line = sent_to_line
 
     def sent_parse_pair_generator(self):
         current_line = next(self.file)
+        sent_line_dict = dict()
+        # Keeps track of sentence number.
+        sent_id = -1
+        # Keeps track of line.
+        line_id = 1
         # Sentence (nested list of str).
         cell_mat = []
         # Treestring.
@@ -27,12 +36,23 @@ class SentParseGen():
             or current_line[0] == '#'):
                 try:
                     current_line = next(self.file)
+                    line_id += 1
                     continue
                 except StopIteration:
                     self.file.close()
+                    if self.sent_to_line:
+                        direc = ''.join(self.sent_to_line)
+                        df = pd.Series(sent_line_dict).to_frame()
+                        if (not os.path.exists(self.sent_to_line[0])
+                        and self.sent_to_line[0]):
+                            os.mkdir(self.sent_to_line[0])
+                        df.to_csv(path_or_buf=direc, encoding='utf-8')
                     return
+
             # Wordindex.
             i = 0
+            sent_id += 1
+            sent_line_dict[sent_id] = line_id
             while (current_line.strip()
             and current_line[0] != '#'):
                 cells = current_line.split()[3:]
@@ -41,8 +61,16 @@ class SentParseGen():
                 f"({ cells[1] } { cells[0] }/{ i })")))
                 try:
                     current_line = next(self.file)
+                    line_id += 1
                 except StopIteration:
                     self.file.close()
+                    if self.sent_to_line:
+                        direc = ''.join(self.sent_to_line)
+                        df = pd.Series(sent_line_dict).to_frame()
+                        if (not os.path.exists(self.sent_to_line[0])
+                        and self.sent_to_line[0]):
+                            os.mkdir(self.sent_to_line[0])
+                        df.to_csv(path_or_buf=direc, encoding='utf-8')
                     return cell_mat, t.replace('(', ' (')[1:]
                 i += 1
             yield cell_mat, t.replace('(', ' (')[1:]
