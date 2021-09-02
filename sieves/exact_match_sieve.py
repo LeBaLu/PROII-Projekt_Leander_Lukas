@@ -11,9 +11,13 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
 class ExactMatchSieve(AbstractSieve):
-    """Sieve inspired by Ragunathan et al.."""
+    """Sieve inspired by Ragunathan et al..
+
+    For an explanation of the attributes see sieve.AbstractSieve.
+
+    """
     def apply_sieve(self):
-        """Matches mentions eith the same extent.
+        """Matches mentions with the same extent.
 
         Ignores personal pronouns.
 
@@ -28,9 +32,17 @@ class ExactMatchSieve(AbstractSieve):
         for mention_list, tree in self.mentions:
             # We work with (sentence, start, end) triples instead of
             # (start, end) pairs.
-            universal_mentions = [(sent_id, start, end) for start, end in mention_list]
+            comp = [(sent_id, start, end) for start, end in mention_list]
+            universal_mentions = comp
             # Which mentions will be resolved by the sieve?.
             selected = self.select_mentions(universal_mentions)
+            # We aren't processing the first sentence currently.
+            if prev_pair:
+                prev_mentions, prev_tree = prev_pair
+                prev_sent_ants = smbb(prev_mentions, prev_tree,
+                                      sent_id-1, l_to_r=False)
+            else:
+                prev_sent_ants = []
             # Current mention index.
             i = 0
             for mention in universal_mentions:
@@ -40,16 +52,9 @@ class ExactMatchSieve(AbstractSieve):
                     # Mention words.
                     words = wsft(tree, mention[1], mention[2])
                     same_sent_antecedents = universal_mentions[:i]
-                    # We aren't processing the first sentence currently.
-                    if prev_pair:
-                        prev_mentions, prev_tree = prev_pair
-                        if 1 in self.clusters[cluster][4]:
-                            continue
-                        else:
-                            prev_sent_ants = smbb(prev_mentions, prev_tree,
-                                                  sent_id-1, l_to_r=False)
-                    else:
-                        prev_sent_ants = []
+                    tag_info = self.clusters[cluster][4]
+                    if 1 in tag_info and len(tag_info) == 1:
+                        continue
                     for antec in same_sent_antecedents:
                         antec_cluster = m_to_c[antec]
                         # Are the mention and its antecedent already in the

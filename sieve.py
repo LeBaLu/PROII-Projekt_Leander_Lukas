@@ -13,7 +13,11 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
 class AbstractSieve(ABC):
-    """ """
+    """Template of a sieve-class and collection of useful methods.
+
+    
+
+    """
     def __init__(self, mentions, clusters, mentions_to_clusters):
         self.mentions = mentions
         self.clusters = clusters
@@ -32,7 +36,7 @@ class AbstractSieve(ABC):
                                                   traversed from left to
                                                   right, if True or from right
                                                   to left, if False. Defaults
-                                                  to True
+                                                  to True.
 
         Returns:
             trees_out(list of nltk.tree.Tree): The desired subtrees in the

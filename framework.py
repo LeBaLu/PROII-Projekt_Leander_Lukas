@@ -18,10 +18,12 @@ class SieveFramework():
 
     id_to_sieve = {'exact_match': exact_match_sieve.ExactMatchSieve,
                    'precise_constructs':
-                   precise_constructs_sieve.PreciseConstructsSieve}
+                   precise_constructs_sieve.PreciseConstructsSieve,
+                   'pronouns': pronoun_sieve.PronounSieve}
 
     def __init__(self, path, sieve_appliance=['exact_match',
-                                              'precise_constructs']):
+                                              'precise_constructs',
+                                              'pronouns']):
         self.generator = SentParseGen(path,
                                       sent_to_line=('saves/',
                                       ''.join((path.split('/')[-1][:-14],
@@ -185,7 +187,7 @@ def main():
     #m1, c1, m_to_c1 = obj1.claim_mentions()
     #logging.info(c1)
     m2, c2, m_to_c2 = obj1.multi_pass_sieve()
-    #logging.info(c2)
+    logging.info(c2)
 
 
 if __name__ == "__main__":
