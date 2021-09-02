@@ -77,7 +77,7 @@ class AbstractSieve(ABC):
         for leaf in tree.leaves()[start:end+1]:
             word_string = ' '.join((word_string,
                                     "/".join(leaf.split('/')[:-1])))
-        return word_string
+        return word_string.strip()
 
     @classmethod
     def sort_mentions_by_bftt(cls, mention_list, tree, sent_id, l_to_r=True):
@@ -107,12 +107,17 @@ class AbstractSieve(ABC):
             sorted_list.append((sent_id, start, end))
         return sorted_list
 
-    def select_mentions(self, mention_list):
+    def select_mentions(self, mention_list, ignore_indef=False):
         """Decides which mentions to resolve with a sieve.
 
         Arg:
             mention_list(list of tuple): Mentions, whose resolving we make a
                                          decision about.
+            ignore_indef(:obj:'bool', optional): Mentions from clusters
+                                                 containing indefinite
+                                                 elements are categorically
+                                                 not resolved, if True.
+                                                 Defaults to False.
 
         Returns:
             to_select(list of bool): Records the result of each decision in
@@ -133,6 +138,11 @@ class AbstractSieve(ABC):
                 to_select.append(False)
                 existing_clusters.add(cluster)
                 pos += 1
+                continue
+            # Don't resolve clusters with indefinite feature.
+            elif ignore_indef and 0 in self.clusters[cluster][5]:
+                to_select.append(False)
+                existing_clusters.add(cluster)
                 continue
             # Only resolve the first appearance of a cluster.
             elif cluster in existing_clusters:

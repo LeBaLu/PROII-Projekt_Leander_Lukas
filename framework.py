@@ -16,9 +16,12 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 class SieveFramework():
     """ """
 
-    id_to_sieve = {'exact_match': exact_match_sieve.ExactMatchSieve}
+    id_to_sieve = {'exact_match': exact_match_sieve.ExactMatchSieve,
+                   'precise_constructs':
+                   precise_constructs_sieve.PreciseConstructsSieve}
 
-    def __init__(self, path, sieve_appliance=['exact_match']):
+    def __init__(self, path, sieve_appliance=['exact_match',
+                                              'precise_constructs']):
         self.generator = SentParseGen(path,
                                       sent_to_line=('saves/',
                                       ''.join((path.split('/')[-1][:-14],
@@ -29,9 +32,10 @@ class SieveFramework():
         """Creates the initial one-mention-clusters.
 
         Agreement information is encoded as follows:
-            0 - singular, inanimate, not a pronoun.
-            1 - plural, 1st person, animate, pronoun.
-            2 - 2nd person.
+            0 - singular, inanimate, tagged as sth else or longer than one
+                word, indefinite.
+            1 - plural, 1st person, animate, tagged as PRP, definite.
+            2 - 2nd person, tagged as NNP.
             3 - 3rd person.
 
         Returns a tuple of:
@@ -46,13 +50,14 @@ class SieveFramework():
                                                                  sentence's
                                                                  parse tree
                                                                  (nltk.Tree).
-            clusters(dict): Cluster-IDs as keys and tuples of 5 sets as values
+            clusters(dict): Cluster-IDs as keys and tuples of 6 sets as values
                             with the 1st set containing mentions as triples
                             of sentence-ID, the first word's ID and the last
                             word's ID, the 2nd set containing number
                             information, the 3rd containing person
                             information, the 4th containing animacy
-                            information and the 5th declaring pronounhood.
+                            information, the 5th containing tag information
+                            and the 6th containing definiteness information.
             mentions_to_clusters(dict): Mentions(see clusters) as keys and
                                         cluster-IDs(int) as values.
 
@@ -79,7 +84,7 @@ class SieveFramework():
             # Save all NPs as mentions.
             for subtree in bftt(tree):
                 # Template for cluster as it will be saved in the dictionary.
-                atom_cluster = set(), set(), set(), set(), set()
+                atom_cluster = set(), set(), set(), set(), set(), set()
                 # Index of 1st word of RE.
                 start = int(subtree.leaves()[0].split('/')[-1])
                 # Index of last word of RE.
@@ -131,14 +136,31 @@ class SieveFramework():
                         atom_cluster[3].add(1)
                     else:
                         atom_cluster[3].add(0)
-                # Pronoun?.
+                # PRP or NNP?.
                 if start == end:
                     if sent[start][1] == 'PRP':
                         atom_cluster[4].add(1)
+                    elif sent[start][1] == 'NNP':
+                        atom_cluster[4].add(2)
                     else:
                         atom_cluster[4].add(0)
                 else:
                     atom_cluster[4].add(0)
+                # Definiteness.
+                if sent[start][0].casefold() in ['a', 'an', 'some', 'other',
+                                                 'one', 'someone', 'anyone',
+                                                 'everyone', 'anybody',
+                                                 'everybody', 'nobody',
+                                                 'somebody', 'another',
+                                                 'either', 'neither', 'each',
+                                                 'little', 'less', 'much',
+                                                 'both', 'few', 'fewer',
+                                                 'many', 'others', 'several',
+                                                 'all', 'any', 'more', 'most',
+                                                 'none']:
+                    atom_cluster[5].add(0)
+                else:
+                    atom_cluster[5].add(1)
                 clusters[cluster_id] = atom_cluster
                 mentions_to_clusters[long_mention] = cluster_id
                 cluster_id += 1
@@ -163,7 +185,7 @@ def main():
     #m1, c1, m_to_c1 = obj1.claim_mentions()
     #logging.info(c1)
     m2, c2, m_to_c2 = obj1.multi_pass_sieve()
-    logging.info(c2)
+    #logging.info(c2)
 
 
 if __name__ == "__main__":
