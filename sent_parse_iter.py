@@ -18,10 +18,10 @@ class SentParseGen():
         self.file = open(path, encoding='utf-8')
         self.gen = self.sent_parse_pair_generator()
         self.sent_to_line = sent_to_line
+        self.sent_line_dict = dict()
 
     def sent_parse_pair_generator(self):
         current_line = next(self.file)
-        sent_line_dict = dict()
         # Keeps track of sentence number.
         sent_id = -1
         # Keeps track of line.
@@ -42,7 +42,7 @@ class SentParseGen():
                     self.file.close()
                     if self.sent_to_line:
                         direc = ''.join(self.sent_to_line)
-                        df = pd.Series(sent_line_dict).to_frame()
+                        df = pd.Series(self.sent_line_dict).to_frame()
                         if (not os.path.exists(self.sent_to_line[0])
                         and self.sent_to_line[0]):
                             os.mkdir(self.sent_to_line[0])
@@ -52,7 +52,7 @@ class SentParseGen():
             # Wordindex.
             i = 0
             sent_id += 1
-            sent_line_dict[sent_id] = line_id
+            self.sent_line_dict[sent_id] = line_id
             while (current_line.strip()
             and current_line[0] != '#'):
                 cells = current_line.split()[3:]
@@ -66,7 +66,7 @@ class SentParseGen():
                     self.file.close()
                     if self.sent_to_line:
                         direc = ''.join(self.sent_to_line)
-                        df = pd.Series(sent_line_dict).to_frame()
+                        df = pd.Series(self.sent_line_dict).to_frame()
                         if (not os.path.exists(self.sent_to_line[0])
                         and self.sent_to_line[0]):
                             os.mkdir(self.sent_to_line[0])

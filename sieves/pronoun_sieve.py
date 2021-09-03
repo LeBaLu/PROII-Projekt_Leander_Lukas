@@ -19,7 +19,6 @@ class PronounSieve(AbstractSieve):
     def apply_sieve(self):
         """ """
         smbb = self.sort_mentions_by_bftt
-        wsft = self.word_string_from_tree
         m_to_c = self.mentions_to_clusters
         # To keep track of the sentence number.
         sent_id = 0

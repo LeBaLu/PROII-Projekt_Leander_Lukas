@@ -23,11 +23,10 @@ class SieveFramework():
 
     def __init__(self, path, sieve_appliance=['exact_match',
                                               'precise_constructs',
-                                              'pronouns']):
+                                              'pronouns'],
+                                              sent_to_line=tuple()):
         self.generator = SentParseGen(path,
-                                      sent_to_line=('saves/',
-                                      ''.join((path.split('/')[-1][:-14],
-                                      '_sentence_to_line.csv'))))
+                                      sent_to_line=sent_to_line)
         self.sieve_appliance = sieve_appliance
 
     def claim_mentions(self):
@@ -73,6 +72,7 @@ class SieveFramework():
         sent_id = 0
         cluster_id = 0
         bftt = abs.breadth_first_tree_traversal
+        s_l_dict = self.generator.sent_line_dict
         # Generate sentence-parse pairs in the file.
         while True:
             try:
@@ -168,26 +168,30 @@ class SieveFramework():
                 cluster_id += 1
             mentions.append((sent_mentions, tree))
             sent_id += 1
-        return mentions, clusters, mentions_to_clusters
+        return mentions, clusters, mentions_to_clusters, s_l_dict
 
     def multi_pass_sieve(self):
         """ """
-        ments, clusts, ments_to_clusts = self.claim_mentions()
+        ments, clusts, ments_to_clusts, s_l_dict = self.claim_mentions()
         for sieve_id in self.sieve_appliance:
             sieve = self.id_to_sieve[sieve_id](ments, clusts, ments_to_clusts)
             sieve.apply_sieve()
             ments = sieve.mentions
             clusts = sieve.clusters
             ments_to_clusts = sieve.mentions_to_clusters
-        return ments, clusts, ments_to_clusts
+        return ments, clusts, ments_to_clusts, s_l_dict
 
 
 def main():
-    obj1 = SieveFramework("flat_train_2012/bc_cctv_0001.v4_auto_conll")
-    #m1, c1, m_to_c1 = obj1.claim_mentions()
+    direc = "flat_train_2012/bc_cctv_0001.v4_auto_conll"
+    obj1 = SieveFramework(direc,
+                          sent_to_line=('refs/',
+                          ''.join((direc.split('/')[-1][:-14],
+                          '_sentence_to_line.csv'))))
+    #m1, c1, m_to_c1, s_to_l1 = obj1.claim_mentions()
     #logging.info(c1)
-    m2, c2, m_to_c2 = obj1.multi_pass_sieve()
-    logging.info(c2)
+    m2, c2, m_to_c2, s_to_l2 = obj1.multi_pass_sieve()
+    logging.info(s_to_l2)
 
 
 if __name__ == "__main__":
