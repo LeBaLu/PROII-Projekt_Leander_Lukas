@@ -22,7 +22,13 @@ class SieveNotImplementedError(Exception):
 
 
 def main():
-    pass
+    sieves = {'EMS', 'PCS'}
+    def foo(s):
+        if s in sieves:
+            return 'success!'
+        else:
+            raise SieveNotImplementedError(f'{s} is not an existing sieve.')
+    print(foo('PS'))
 
 
 if __name__ == "__main__":
