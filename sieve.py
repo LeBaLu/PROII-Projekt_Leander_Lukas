@@ -5,7 +5,6 @@
 """Abstrakte Siebklasse."""
 from abc import ABC, abstractmethod
 from nltk.tree import Tree
-from sent_parse_iter import SentParseGen
 import logging
 
 
