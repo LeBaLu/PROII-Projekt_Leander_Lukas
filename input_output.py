@@ -8,7 +8,6 @@ from framework import SieveFramework
 import multiprocessing as mp
 import csv
 import os
-import sys
 import logging
 
 
@@ -54,7 +53,7 @@ class PromptReader():
         files = []
         # The user wants to process files in a folder.
         if path[-1] == '/':
-            folder_files = os.listdir(path)[:5]
+            folder_files = os.listdir(path)
             files = [''.join((path, name)) for name in folder_files]
         # The user wants to process a single file.
         else:

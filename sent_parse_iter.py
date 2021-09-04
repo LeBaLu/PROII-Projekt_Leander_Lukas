@@ -4,7 +4,6 @@
 # Matrikelnr.: 802559
 """ """
 
-import pandas as pd
 import os
 import logging
 
@@ -14,10 +13,9 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 class SentParseGen():
     """ """
-    def __init__(self, path, sent_to_line=tuple()):
+    def __init__(self, path):
         self.file = open(path, encoding='utf-8')
         self.gen = self.sent_parse_pair_generator()
-        self.sent_to_line = sent_to_line
         self.sent_line_dict = dict()
 
     def sent_parse_pair_generator(self):
@@ -40,13 +38,6 @@ class SentParseGen():
                     continue
                 except StopIteration:
                     self.file.close()
-                    if self.sent_to_line:
-                        direc = ''.join(self.sent_to_line)
-                        df = pd.Series(self.sent_line_dict).to_frame()
-                        if (not os.path.exists(self.sent_to_line[0])
-                        and self.sent_to_line[0]):
-                            os.mkdir(self.sent_to_line[0])
-                        df.to_csv(path_or_buf=direc, encoding='utf-8')
                     return
 
             # Wordindex.
@@ -64,13 +55,6 @@ class SentParseGen():
                     line_id += 1
                 except StopIteration:
                     self.file.close()
-                    if self.sent_to_line:
-                        direc = ''.join(self.sent_to_line)
-                        df = pd.Series(self.sent_line_dict).to_frame()
-                        if (not os.path.exists(self.sent_to_line[0])
-                        and self.sent_to_line[0]):
-                            os.mkdir(self.sent_to_line[0])
-                        df.to_csv(path_or_buf=direc, encoding='utf-8')
                     return cell_mat, t.replace('(', ' (')[1:]
                 i += 1
             yield cell_mat, t.replace('(', ' (')[1:]

@@ -1,0 +1,12 @@
+#      Python: 3.7.6
+#   Kodierung: utf-8
+#        Name: Leander Lukas
+# Matrikelnr.: 802559
+"""Skript zum Ausführen des Programms."""
+import sys
+from input_output import PromptReader as pr
+
+
+if __name__ == "__main__":
+	reader = pr(sys.argv)
+	reader.write_results()
