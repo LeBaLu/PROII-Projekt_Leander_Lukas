@@ -31,8 +31,8 @@ class PromptReader():
             sieve_appliance = console_input[2:]
             for sieve_id in sieve_appliance:
                 if sieve_id not in SieveFramework.id_to_sieve:
-                    raise SieveNotImplementedError(f'No sieve by the name of'\
-                                                   f' {sieve_id} has been im'\
+                    raise SieveNotImplementedError(f'No sieve by the name of'
+                                                   f' {sieve_id} has been im'
                                                    f'plemented to date.')
             self.sieve_appliance = sieve_appliance
         else:

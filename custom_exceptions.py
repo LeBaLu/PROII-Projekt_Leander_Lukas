@@ -8,6 +8,8 @@ Hier sind die Ausnahmen, die bei fehlerhaftem oder unvollständigem Input
 geworfen werden sollen, definiert.
 
 """
+
+
 class SieveNotImplementedError(Exception):
     """Unknown-sieve-exception.
 
@@ -23,6 +25,7 @@ class SieveNotImplementedError(Exception):
 
 def main():
     sieves = {'EMS', 'PCS'}
+
     def foo(s):
         if s in sieves:
             return 'success!'

@@ -61,11 +61,11 @@ class SentParseGen():
             sent_id += 1
             self.sent_line_dict[sent_id] = line_id
             while (current_line.strip()
-            and current_line[0] != '#'):
+                   and current_line[0] != '#'):
                 cells = current_line.split()[3:]
                 cell_mat.append(cells)
-                t = ''.join((t, cells[2].replace('*',
-                f"({ cells[1] } { cells[0] }/{ i })")))
+                new_child = f"({ cells[1] } { cells[0] }/{ i })"
+                t = ''.join((t, cells[2].replace('*', new_child)))
                 try:
                     current_line = next(self.file)
                     line_id += 1

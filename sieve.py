@@ -33,7 +33,8 @@ class AbstractSieve(ABC):
         self.mentions_to_clusters = mentions_to_clusters
 
     @staticmethod
-    def breadth_first_tree_traversal(tree, label_in=['NP', 'NX'], left_to_right=True):
+    def breadth_first_tree_traversal(tree, label_in=['NP', 'NX'],
+                                     left_to_right=True):
         """Does breadth-first search for subtrees with certain labels.
 
         Args:
@@ -209,8 +210,7 @@ def main():
     # werden sollte.
     obj1 = AbstractSieve([(0, 0, 0), (1, 0, 0), (2, 3, 5)],
                          {0: ({(0, 0, 0)}, {0}),
-                          1: ({(1, 0, 0), (2, 3, 5)}, {1})
-                                                          },
+                          1: ({(1, 0, 0), (2, 3, 5)}, {1})},
                          {(0, 0, 0): 0, (1, 0, 0): 1, (2, 3, 5): 1})
     logging.info(obj1.select_mentions(obj1.mentions))
     obj1.merge_clusters(0, 1)
