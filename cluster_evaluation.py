@@ -2,7 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
+"""Berechnung des paarweisen F1-Scores."""
 from sent_parse_iter import SentParseGen
 from framework import SieveFramework
 import logging
@@ -12,7 +12,15 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
 class ConllClusterEvaluator():
-    """ """
+    """For comparing read and calculated clusters.
+
+    Args:
+        path(str): Directory of a conll-file we use to calculate
+                   clusters with sieves and extract the given clusters.
+        sieve_appliance(list of str): The sieves and the order they're applied
+                                      in.
+
+    """
     def __init__(self, path, sieve_appliance):
         self.path = path
         self.sieve_appliance = sieve_appliance
@@ -78,7 +86,8 @@ class ConllClusterEvaluator():
                         else:
                             clust, start = mention_info[level]
                             clusters = self.add_mention(clusters, clust,
-                                                        (sent_id, start, word_id))
+                                                        (sent_id, start,
+                                                         word_id))
                             level -= 1
                 word_id += 1
             sent_id += 1

@@ -14,7 +14,17 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 class AbstractSieve(ABC):
     """Template of a sieve-class and collection of useful methods.
 
-    
+    Args:
+        mentions(list of tuple): Pairs of mentions(list of tuple) and parse
+                                 tree(nltk.tree.Tree) per sentence. Reference
+                                 for candidates when deciding whether to merge
+                                 clusters.
+        clusters(dict): Cluster-IDs(int) as keys and tuples of sets of
+                        mentions and features as values. See
+                        framework.SieveFramework.claim_mentions for more
+                        information.
+        mentions_to_clusters(dict): Mentions(tuple of int) as keys and
+                                    mention-IDs(int) as values.
 
     """
     def __init__(self, mentions, clusters, mentions_to_clusters):

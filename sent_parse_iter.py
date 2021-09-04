@@ -2,9 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
-
-import os
+"""Funktionalitäten zum Einlesen einer conll-Datei."""
 import logging
 
 
@@ -12,13 +10,31 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
 class SentParseGen():
-    """ """
+    """Line-list-parse-tree-generator for conll-files.
+
+    Arg:
+        path(str): Directory of the conll-file.
+
+    """
     def __init__(self, path):
+        #: _io.TextIOWrapper: The file's line generator.
         self.file = open(path, encoding='utf-8')
+        # The generator used by __next__().
         self.gen = self.sent_parse_pair_generator()
+        #: dict: The ids of sentences as keys and their starting lines as
+        #        values.
         self.sent_line_dict = dict()
 
     def sent_parse_pair_generator(self):
+        """Generator of tuples.
+
+        Yields:
+            cell_mat(list of list of str): Nested list containing the lines of
+                                           a sentence in the conll-format.
+            t(str): The sentence's parse tree as a string that can easily be
+                    converted by nltk.tree.
+
+        """
         current_line = next(self.file)
         # Keeps track of sentence number.
         sent_id = -1

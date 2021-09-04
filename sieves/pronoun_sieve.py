@@ -2,7 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
+"""Pronomensieb."""
 from sieve import AbstractSieve
 import logging
 
@@ -17,7 +17,19 @@ class PronounSieve(AbstractSieve):
 
     """
     def apply_sieve(self):
-        """ """
+        """Matches pronominal mentions to potential antecedents.
+
+        Conditions for merging clusters regarding agreement infos:
+            number (from pos-tags): Has to be identical.
+            person (from pronounlist): Has to be identical.
+            animacy (from NER-labels): Has to be identical, if specified for
+                                      both. Doesn't matter otherwise.
+            pos-tags(for one-word mentions): The cluster we're trying to
+                                             resolve has to be tagged as PRP,
+                                             the antecedent doesn't.
+            Definiteness(from list): Is ignored completely.
+
+        """
         smbb = self.sort_mentions_by_bftt
         m_to_c = self.mentions_to_clusters
         # To keep track of the sentence number.

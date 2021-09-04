@@ -2,7 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
+"""Precis-Constructs-Sieb."""
 from sieve import AbstractSieve
 import logging
 

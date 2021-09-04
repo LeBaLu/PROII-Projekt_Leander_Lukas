@@ -2,7 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
+"""Alles, um Rohdaten in Cluster umzuwandeln und Siebe darauf anzuwenden."""
 from sieve import AbstractSieve as abs
 from sent_parse_iter import SentParseGen
 from sieves import *
@@ -14,19 +14,28 @@ logging.basicConfig(filename='out.log', filemode='w', level=logging.INFO)
 
 
 class SieveFramework():
-    """ """
+    """Core of the program that initiates clusters and applies the sieves.
+
+    Attribute:
+        id_to_sieve(dict): Sieve-IDs(str) as keys and
+                           sieve-classes(abc.ABCMeta) as values.
+
+    Args:
+        path(str): Directory of the file that the multi-pass sieve is applied
+                   to.
+        sieve_appliance(list of str): IDs of sieves in the order they are to
+                                      be applied in. See README.md for
+                                      details.
+
+    """
 
     id_to_sieve = {'exact_match': exact_match_sieve.ExactMatchSieve,
                    'precise_constructs':
                    precise_constructs_sieve.PreciseConstructsSieve,
                    'pronouns': pronoun_sieve.PronounSieve}
 
-    def __init__(self, path, sieve_appliance=['exact_match',
-                                              'precise_constructs',
-                                              'pronouns'],
-                                              sent_to_line=tuple()):
-        self.generator = SentParseGen(path,
-                                      sent_to_line=sent_to_line)
+    def __init__(self, path, sieve_appliance):
+        self.generator = SentParseGen(path)
         self.sieve_appliance = sieve_appliance
 
     def claim_mentions(self):
@@ -61,6 +70,9 @@ class SieveFramework():
                             and the 6th containing definiteness information.
             mentions_to_clusters(dict): Mentions(see clusters) as keys and
                                         cluster-IDs(int) as values.
+            s_l_dict(dict): Sentence-IDs(int) as keys and line-IDs(int) as
+                            values. Necessary for translating the
+                            sent_id/word_id mention-IDS into line numbers.
 
         """
         # List of tuples containing a sentence's mentions and parse tree.
@@ -171,7 +183,12 @@ class SieveFramework():
         return mentions, clusters, mentions_to_clusters, s_l_dict
 
     def multi_pass_sieve(self):
-        """ """
+        """Applies specified sieves to the initial clusters.
+
+        Returns:
+            See claim_mentions.
+
+        """
         ments, clusts, ments_to_clusts, s_l_dict = self.claim_mentions()
         for sieve_id in self.sieve_appliance:
             sieve = self.id_to_sieve[sieve_id](ments, clusts, ments_to_clusts)
@@ -184,14 +201,14 @@ class SieveFramework():
 
 def main():
     direc = "flat_train_2012/bc_cctv_0001.v4_auto_conll"
-    obj1 = SieveFramework(direc,
-                          sent_to_line=('refs/',
-                          ''.join((direc.split('/')[-1][:-14],
-                          '_sentence_to_line.csv'))))
-    #m1, c1, m_to_c1, s_to_l1 = obj1.claim_mentions()
-    #logging.info(c1)
+    obj1 = SieveFramework(direc, ['exact_match', 'precise_constructs',
+                                  'pronouns'])
+    m1, c1, m_to_c1, s_to_l1 = obj1.claim_mentions()
+    # Initial clusters.
+    logging.info(c1)
     m2, c2, m_to_c2, s_to_l2 = obj1.multi_pass_sieve()
-    logging.info(s_to_l2)
+    # Clusters after multi-pass sieve.
+    logging.info(c2)
 
 
 if __name__ == "__main__":

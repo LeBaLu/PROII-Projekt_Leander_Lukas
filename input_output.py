@@ -2,7 +2,7 @@
 #   Kodierung: utf-8
 #        Name: Leander Lukas
 # Matrikelnr.: 802559
-""" """
+"""Verwaltung der Eingabe und Speichern der Ergebnisse des Programms."""
 from custom_exceptions import *
 from framework import SieveFramework
 import multiprocessing as mp
