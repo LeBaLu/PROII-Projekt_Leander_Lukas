@@ -47,10 +47,13 @@ Additionally you can specify the sieves to use and in which order by adding thei
 
 **pronouns** - for the pronoun sieve
 
-For example: a call for applying the exact-match sieve and the pronoun sieve looks like this:
+For example: a call for applying the exact-match sieve and then the pronoun sieve looks like this:
 ```
 python DIRECTORY_TO_YOUR_DATA exact_match pronouns
 ```
+
+If nothing is specified all the sieves are applied in the order shown above.
+
 
 The results.csv can be found in `os.getcwd()/results/`.
 
